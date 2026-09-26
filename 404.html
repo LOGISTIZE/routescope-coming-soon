@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RouteScope · De retour très bientôt</title>
+  <meta name="description" content="RouteScope fait une pause pour préparer la suite. Les profils transporteurs issus des registres officiels reviennent très bientôt.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#202116">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none'%3E%3Ccircle cx='24' cy='24' r='22' stroke='%23E5E5D2' stroke-width='3'/%3E%3Cpath d='M16 12v24M16 12h8c3.3 0 6 2.7 6 6s-2.7 6-6 6h-8M24 24l8 12' stroke='%23E5E5D2' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='16' y1='24' x2='30' y2='24' stroke='%23FF5B00' stroke-width='2' stroke-dasharray='3 2' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.bunny.net">
+  <link href="https://fonts.bunny.net/css?family=lexend:300,400,600,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --kaki-50: #F4F4EB;
+      --kaki-100: #E5E5D2;
+      --kaki-200: #CACBA8;
+      --kaki-500: #6C6F49;
+      --kaki-600: #565839;
+      --kaki-700: #42442C;
+      --kaki-800: #303121;
+      --kaki-900: #202116;
+      --orange: #FF5B00;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: Lexend, system-ui, -apple-system, sans-serif;
+      background: var(--kaki-900);
+      color: var(--kaki-100);
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Soft light pools, kaki only */
+    .glow {
+      position: fixed;
+      inset: -20%;
+      background:
+        radial-gradient(40% 35% at 18% 20%, rgba(108, 111, 73, 0.45), transparent 70%),
+        radial-gradient(35% 30% at 85% 85%, rgba(86, 88, 57, 0.55), transparent 70%),
+        radial-gradient(25% 20% at 80% 15%, rgba(255, 91, 0, 0.08), transparent 70%);
+      animation: drift 18s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    /* Film grain */
+    .grain {
+      position: fixed;
+      inset: 0;
+      opacity: 0.07;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* Road network */
+    .roads {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .roads .base { stroke: rgba(202, 203, 168, 0.10); stroke-width: 1.5; fill: none; }
+    .roads .lane {
+      stroke: var(--orange);
+      stroke-width: 2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-dasharray: 10 14;
+      animation: travel 6s linear infinite;
+      opacity: 0.55;
+    }
+    .roads .lane.slow { animation-duration: 11s; opacity: 0.3; }
+    .roads .lane.rev { animation-direction: reverse; animation-duration: 9s; opacity: 0.35; }
+    .roads .node { fill: var(--kaki-900); stroke: var(--kaki-200); stroke-width: 1.5; opacity: 0.5; }
+    .roads .node.hot { stroke: var(--orange); opacity: 0.9; animation: ping 2.8s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+
+    main {
+      position: relative;
+      z-index: 1;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+      text-align: center;
+    }
+    /* Quiet zone so the roads never cross the copy */
+    main::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(40% 55% at 50% 50%, rgba(32, 33, 22, 0.92), rgba(32, 33, 22, 0.6) 55%, transparent 80%);
+      pointer-events: none;
+    }
+    @media (max-width: 640px) {
+      main::before { background: radial-gradient(75% 45% at 50% 52%, rgba(32, 33, 22, 0.92), rgba(32, 33, 22, 0.55) 60%, transparent 85%); }
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 26px;
+      letter-spacing: -0.5px;
+      color: var(--kaki-50);
+      opacity: 0;
+      animation: rise 0.9s 0.1s cubic-bezier(.2,.7,.2,1) forwards;
+    }
+    .logo svg { width: 40px; height: 40px; }
+    .logo span { color: var(--orange); }
+
+    .status {
+      margin-top: 44px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      border: 1px solid rgba(202, 203, 168, 0.25);
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--kaki-200);
+      background: rgba(48, 49, 33, 0.6);
+      backdrop-filter: blur(6px);
+      opacity: 0;
+      animation: rise 0.9s 0.25s cubic-bezier(.2,.7,.2,1) forwards;
+    }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--orange);
+      box-shadow: 0 0 0 0 rgba(255, 91, 0, 0.6);
+      animation: pulse 2s infinite;
+    }
+
+    h1 {
+      margin-top: 28px;
+      max-width: 14ch;
+      font-size: clamp(40px, 7.5vw, 84px);
+      line-height: 1.02;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--kaki-50);
+      opacity: 0;
+      animation: rise 1s 0.4s cubic-bezier(.2,.7,.2,1) forwards;
+    }
+    h1 em {
+      font-style: normal;
+      color: var(--orange);
+    }
+
+    .lead {
+      margin-top: 24px;
+      max-width: 42ch;
+      text-wrap: balance;
+      font-size: clamp(16px, 2vw, 19px);
+      line-height: 1.6;
+      font-weight: 300;
+      color: var(--kaki-200);
+      opacity: 0;
+      animation: rise 1s 0.55s cubic-bezier(.2,.7,.2,1) forwards;
+    }
+    .lead strong { font-weight: 600; color: var(--kaki-100); }
+
+    .progress {
+      margin-top: 40px;
+      width: min(320px, 80vw);
+      height: 3px;
+      border-radius: 3px;
+      background: rgba(202, 203, 168, 0.15);
+      overflow: hidden;
+      opacity: 0;
+      animation: rise 1s 0.7s cubic-bezier(.2,.7,.2,1) forwards;
+    }
+    .progress i {
+      display: block;
+      width: 35%;
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, transparent, var(--orange), transparent);
+      animation: scan 2.2s ease-in-out infinite;
+    }
+
+    .cta {
+      margin-top: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 48px;
+      padding: 12px 24px;
+      border-radius: 10px;
+      background: var(--kaki-100);
+      color: var(--kaki-900);
+      font-weight: 600;
+      font-size: 15px;
+      text-decoration: none;
+      transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+      opacity: 0;
+      animation: rise 1s 0.85s cubic-bezier(.2,.7,.2,1) forwards;
+    }
+    .cta:hover { background: var(--kaki-50); transform: translateY(-2px); box-shadow: 0 12px 32px -12px rgba(0,0,0,.6); }
+    .cta:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
+    .cta svg { width: 18px; height: 18px; }
+
+    footer {
+      position: fixed;
+      bottom: 20px;
+      left: 0; right: 0;
+      z-index: 1;
+      text-align: center;
+      font-size: 12px;
+      color: rgba(202, 203, 168, 0.55);
+      letter-spacing: 0.02em;
+    }
+
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    @keyframes travel { to { stroke-dashoffset: -240; } }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 91, 0, 0.55); }
+      70% { box-shadow: 0 0 0 10px rgba(255, 91, 0, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 91, 0, 0); }
+    }
+    @keyframes ping { 0% { transform: scale(1); } 50% { transform: scale(1.5); } 100% { transform: scale(1); } }
+    @keyframes scan { 0% { transform: translateX(-110%); } 100% { transform: translateX(320%); } }
+    @keyframes drift { to { transform: translate3d(3%, -2%, 0) scale(1.05); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+      .logo, .status, h1, .lead, .progress, .cta { opacity: 1; }
+    }
+
+    @media (max-height: 640px) {
+      .status { margin-top: 24px; }
+      .progress, .cta { margin-top: 24px; }
+      footer { position: static; margin-top: 24px; }
+      body { overflow: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+
+  <svg class="roads" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <path class="base" d="M-40 690 C 240 640, 380 520, 610 540 S 1010 700, 1480 560" />
+    <path class="lane" d="M-40 690 C 240 640, 380 520, 610 540 S 1010 700, 1480 560" />
+    <path class="base" d="M-40 180 C 300 240, 520 110, 820 170 S 1210 330, 1480 250" />
+    <path class="lane slow" d="M-40 180 C 300 240, 520 110, 820 170 S 1210 330, 1480 250" />
+    <path class="base" d="M260 -40 C 300 200, 180 420, 330 620 S 420 860, 380 940" />
+    <path class="lane rev" d="M260 -40 C 300 200, 180 420, 330 620 S 420 860, 380 940" />
+    <path class="base" d="M1160 -40 C 1100 180, 1250 380, 1120 560 S 1060 820, 1140 940" />
+    <path class="lane slow" d="M1160 -40 C 1100 180, 1250 380, 1120 560 S 1060 820, 1140 940" />
+    <circle class="node" cx="330" cy="620" r="6" />
+    <circle class="node hot" cx="1120" cy="560" r="6" />
+    <circle class="node hot" cx="262" cy="200" r="5" />
+  </svg>
+
+  <div class="grain" aria-hidden="true"></div>
+
+  <main>
+    <div class="logo" aria-label="RouteScope">
+      <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <circle cx="24" cy="24" r="22" stroke="#E5E5D2" stroke-width="3" />
+        <path d="M16 12v24M16 12h8c3.3 0 6 2.7 6 6s-2.7 6-6 6h-8M24 24l8 12" stroke="#E5E5D2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        <line x1="16" y1="24" x2="30" y2="24" stroke="#FF5B00" stroke-width="2" stroke-dasharray="3 2" stroke-linecap="round" />
+      </svg>
+      <div>Route<span>Scope</span></div>
+    </div>
+
+    <p class="status"><span class="dot" aria-hidden="true"></span>Halte technique en cours</p>
+
+    <h1>On reprend la route <em>très bientôt.</em></h1>
+
+    <p class="lead">
+      RouteScope fait une pause pour préparer la suite.
+      Les <strong>84&nbsp;000 profils transporteurs</strong> issus des registres
+      officiels vous attendent au prochain&nbsp;virage.
+    </p>
+
+    <div class="progress" aria-hidden="true"><i></i></div>
+
+    <a class="cta" href="mailto:contact@routescope.fr">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+      Nous écrire
+    </a>
+  </main>
+
+  <footer>© 2026 RouteScope · LOGISTIZE · Données issues du RENE, Ministère de la Transition Écologique</footer>
+</body>
+</html>
